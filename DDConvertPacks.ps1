@@ -29,6 +29,11 @@ If you omit this parameter, or if you include it with a value of *, the script w
 If you choose to include all asset packs in the source folder, this specifies a comma-separated list of any asset packs you might wish to exclude from conversion.
 As with the Include parameter, Do not include the full path. Just include the file name.
 
+.PARAMETER CleanUp
+Setting this to true will delete the working folders ("Unpacked Assets" and "Converted Folders" when the script completes, leaving you only with "Converted Packs".
+Setting this to false will leave the working folders in place.
+The default setting is true.
+
 .EXAMPLE
 DDConvertPacks -Source "C:\Custom Assets"
 
@@ -60,14 +65,20 @@ DDConvertPacks -Source "C:\Custom Assets" -Destination "C:\webp Assets"
 Convert all the all the asset packs in "C:\Custom Assets" with the resulting files and folders to be stored in "C:\webp Assets"
 
 .EXAMPLE
-DDConvertPacks -Source "C:\Custom Assets\My Mods.dungeondraft_pack"
+DDConvertPacks -Source "C:\Custom Assets\AssetPack1.dungeondraft.pack"
 
-Convert only "C:\Custom Assets\My Mods.dungeondraft_pack" with the resulting files and folders to be stored in "C:\Custom Assets - webp"
+Convert only "C:\Custom Assets\AssetPack1.dungeondraft.pack" with the resulting files and folders to be stored in "C:\Custom Assets - webp"
 
 .EXAMPLE
-DDConvertPacks -Source "C:\Custom Assets\My Mods.dungeondraft_pack" -Destination "C:\webp Assets"
+DDConvertPacks -Source "C:\Custom Assets\AssetPack1.dungeondraft_pack" -Destination "C:\webp Assets"
 
-Convert only "C:\Custom Assets\My Mods.dungeondraft_pack" with the resulting files and folders to be stored in "C:\webp Assets"
+Convert only "C:\Custom Assets\AssetPack1.dungeondraft_pack" with the resulting files and folders to be stored in "C:\webp Assets"
+
+.EXAMPLE
+DDConvertPacks -Source "C:\Custom Assets\AssetPack1.dungeondraft_pack" -Destination "C:\webp Assets" -Cleanup False
+
+Convert only "C:\Custom Assets\AssetPack1.dungeondraft_pack" with the resulting files and folders to be stored in "C:\webp Assets"
+Then leave the working folders in place. Do not delete them.
 
 .NOTES
 
