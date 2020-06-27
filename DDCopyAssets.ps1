@@ -85,6 +85,12 @@ Function ValidateInput ($Src,$Dst,$Tag,$Prt) {
         return $ReturnValue
     } # if (-not (Test-Path $Src))
 
+    if ($Dst -eq "") {
+        [array]$ReturnValue = $false
+        [array]$ReturnValue += "    No value specified for Destination."
+        return $ReturnValue
+    } # if ($Src -eq "")
+
     if (-not (Test-ValidPathName $Dst)) {
         [array]$ReturnValue = $false
         [array]$ReturnValue += "    Invalid path name for Destination: $Dst"
@@ -174,7 +180,6 @@ Function InvalidExit {
 } # Function InvalidExit
 
 # Main {
-Try {
     $StartNow = Get-Date
     $ScriptName = "DDCopyAssets"
     $Version = 3
@@ -183,7 +188,6 @@ Try {
     <# Info #> "### Starting $ScriptName V.$Version at $StartNow"
     <# Info #> ""
 
-    if ($Destination -eq "") {$Destination = "$Source - webp"}
     $Validate = @()
     $Validate = ValidateInput $Source $Destination $CreateTagFile $Portals
     if ($Validate.count -ge 1) {
@@ -385,7 +389,4 @@ Try {
     <# Info #> $RunTime = $EndNow - $StartNow
     <# Info #> "### Ending $ScriptName V.$Version at $EndNow with a run time of " + ("{0:hh\:mm\:ss}" -f $RunTime)
     <# Info #> ""
-} Catch {
-   "Hello"
-}
 # } Main

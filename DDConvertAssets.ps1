@@ -166,7 +166,7 @@ Function InvalidExit {
     <# Info #> "    Finished Replicating folder structure."
     <# Info #> ""
 
-    $FileTypes = @(".bmp",".dds",".exr",".hdr",".jpg",".jpeg",".png",".tga",".svg",".svgz")
+    $FileTypes = @(".bmp",".dds",".exr",".hdr",".jpg",".jpeg",".png",".tga",".svg",".svgz",".webp")
     $Wildcards = @()
     foreach ($Extension in $FileTypes) {$Wildcards += "*$Extension"}
 
@@ -201,8 +201,13 @@ Function InvalidExit {
         if (Test-Path $WEBPasset) {
             <# Info #>  "        $WEBPasset already exists."
         } else {
-            <# Info #>  "        Converting $WEBPasset..."
-            & $ImageMagick convert $ImageAsset $WEBPasset
+            if ($asset.extension -eq ".webp") {
+                <# Info #>  "        Copying $WEBPasset..."
+                Copy-Item $ImageAsset $WEBPasset
+            } else {
+                <# Info #>  "        Converting $WEBPasset..."
+                & $ImageMagick convert $ImageAsset $WEBPasset
+            }
         } # if (Test-Path $WEBPasset)
     } # foreach ($asset in $PNGFiles)
     <# Info #>  "    Finished converting assets."

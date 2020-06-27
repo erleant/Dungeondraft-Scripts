@@ -202,7 +202,7 @@ Function InvalidExit {
     <# Info #> "### Starting $ScriptName V.$Version at $StartNow"
     <# Info #> ""
 
-    if (-not ($Include -eq "*")) {$IncludeList = $Include.Split(",")} else {$IncludeList = ""}
+    if ($Include -eq "*") {$IncludeList = ""} else {$IncludeList = $Include.Split(",")}
     $ExcludeList = $Exclude
     $Validate = @()
     $Validate = ValidateInput $Source $IncludeList $ExcludeList

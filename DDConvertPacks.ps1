@@ -83,7 +83,7 @@ Then leave the working folders in place. Do not delete them.
 .NOTES
 
 You must have the "DDConvertAssets.ps1" PowerShell script in the same folder as this script.
-This can be found at https://gitlab.com/EightBitz/dungeondraft-scripts
+This can be found at https://github.com/EightBitz/Dungeondraft-Scripts
 
 You must have "dungeondraft-unpack.exe" and "dungeondraft-pack.exe" in the same folder as this script.
 These can be found at https://github.com/Ryex/Dungeondraft-GoPackager/releases/tag/v1.0.0
@@ -259,10 +259,19 @@ Function InvalidExit {
     <# Info #> ""
     <# Info #> "### Starting $ScriptName V.$Version at $StartNow"
     <# Info #> ""
+    
+    $SourcePath = [System.IO.DirectoryInfo]$Source
+    if ($SourcePath.Extension -eq ".dungeondraft_pack") {
+        $Source = $SourcePath.Parent.FullName
+        $Include = $SourcePath.Name
+    } # if ($SourcePath.Extension -eq ".dungeondraft_pack")
 
     if ($Destination -eq "") {$Destination = "$Source - webp"}
+
+    if ($Include -eq "*") {$IncludeList = ""} else {$IncludeList = $Include.Split(",")}
+    $ExcludeList = $Exclude
     $Validate = @()
-    $Validate = ValidateInput $Source $Destination $Include $Exclude $CleanUp
+    $Validate = ValidateInput $Source $Destination $IncludeList $ExcludeList $CleanUp
     if ($Validate.count -ge 1) {
         $Valid = $Validate[0]
         $ExitMessage = $Validate[1]
@@ -365,11 +374,16 @@ Function InvalidExit {
 
     [bool]$CleanUp = StringToBool $CleanUp
     if ($CleanUp) {
-        <# Info #> "    Removing $UnpackDestination..."
-        Remove-Item $UnpackDestination -Recurse
-        <# Info #> "    Removing $ConvertDestination..."
-        Remove-Item $ConvertDestination -Recurse
-        <# Info #> ""
+        if (Test-Path $UnpackDestination) {
+            <# Info #> "    Removing $UnpackDestination..."
+            Remove-Item $UnpackDestination -Recurse
+        } # if (Test-Path $UnpackDestination)
+
+        if (Test-Path $ConvertDestination) {
+            <# Info #> "    Removing $ConvertDestination..."
+            Remove-Item $ConvertDestination -Recurse
+        } # if (Test-Path $ConvertDestination)
+        <# Info #> "    Finished CleanUp"
     } # if ($CleanUp)
 
     $EndNow = Get-Date
