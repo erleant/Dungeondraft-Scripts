@@ -233,8 +233,8 @@ Function InvalidExit {
     # Initialize some variables
     $ParentSrc = $source
     $ParentDst = $destination
-    $ObjectDst = $ParentDst + "\textures\objects"
-    if ($Portals) {$PortalDst = $ParentDst + "\textures\portals"} else {$PortalDst = $ObjectDst}
+    $ObjectDst = "\textures\objects"
+    if ($Portals) {$PortalDst = "\textures\portals"} else {$PortalDst = "\textures\objects"}
     $FileTypes = @(".bmp",".dds",".exr",".hdr",".jpg",".jpeg",".png",".tga",".svg",".svgz")
     
     # Set up an array of wildcard patterns that includes each extension in $FileTypes
@@ -345,15 +345,25 @@ Function InvalidExit {
     # Process objects
     if ($NewObjects.count -ge 1) {
         <# Info #> "    Replicating folder structure for objects..."
-        $ObjectFolderList = ($NewObjects.Directory.fullname | Select -Unique).replace($Source,$ObjectDst)
+
+        $ObjectFolderList = $NewObjects.Directory.fullname | Select -Unique
         foreach ($Folder in $ObjectFolderList) {
-            if (-not (Test-Path $Folder)) {New-Item $Folder -ItemType Directory | Out-Null}
+            If ($folder.contains($ObjectDst)) {
+                $ReplaceSource = $Destination
+            } else {
+                $ReplaceSource = $Destination + $ObjectDst
+            } # If ($folder.contains($ObjectDst))
+
+            $FolderDst = $Folder.replace($Source,$ReplaceSource)
+            if (-not (Test-Path $FolderDst)) {New-Item $FolderDst -ItemType Directory | Out-Null}
         } # foreach ($Folder in $ObjectFolderList)
 
         # Copy Objects
         foreach ($Object in $NewObjects) {
             <# Info #> "    Copying " + $Object.fullname + "..."
-            Copy-Item $Object.fullname $Object.fullname.replace($Source,$ObjectDst) | Out-Null
+            $CopySource = $Object.fullname
+            $CopyDestination = $Object.fullname.replace($Source,$ReplaceSource)
+            Copy-Item $CopySource $CopyDestination | Out-Null
         } # foreach ($Object in $NewObjects)
         <# Info #> ""
     } # if ($NewObjects.count -ge 1)
@@ -361,14 +371,23 @@ Function InvalidExit {
     # Process doors and windows
     if ($NewPortals.count -ge 1) {
         <# Info #> "    Replicating folder structure for portals..."
-        $PortalFolderList = ($NewPortals.Directory.fullname | Select -Unique).replace($Source,$PortalDst)
+        $PortalFolderList = $NewPortals.Directory.fullname | Select -Unique
         foreach ($Folder in $PortalFolderList) {
-            if (-not (Test-Path $Folder)) {New-Item $Folder -ItemType Directory | Out-Null}
-        } # foreach ($Folder in $PortalFolderList)
+            If ($folder.contains($PortalDst)) {
+                $ReplaceSource = $Destination
+            } else {
+                $ReplaceSource = $Destination + $PortalDst
+            } # If ($folder.contains($ObjectDst))
+
+            $FolderDst = $Folder.replace($Source,$ReplaceSource)
+            if (-not (Test-Path $FolderDst)) {New-Item $FolderDst -ItemType Directory | Out-Null}
+        } # foreach ($Folder in $ObjectFolderList)
 
         foreach ($Object in $NewPortals) {
             <# Info #> "    Copying " + $Object.fullname + "..."
-            Copy-Item $Object.fullname $Object.fullname.replace($Source,$PortalDst)
+            $CopySource = $Object.fullname
+            $CopyDestination = $Object.fullname.replace($Source,$ReplaceSource)
+            Copy-Item $CopySource $CopyDestination | Out-Null
         } # foreach ($Object in $NewPortals)
         <# Info #> ""
     } # if ($NewPortals.count -ge 1)
