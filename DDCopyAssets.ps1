@@ -182,7 +182,7 @@ Function InvalidExit {
 # Main {
     $StartNow = Get-Date
     $ScriptName = "DDCopyAssets"
-    $Version = 3
+    $Version = 5
 
     <# Info #> ""
     <# Info #> "### Starting $ScriptName V.$Version at $StartNow"
@@ -234,7 +234,7 @@ Function InvalidExit {
     $ParentSrc = $source
     $ParentDst = $destination
     $ObjectDst = "\textures\objects"
-    if ($Portals) {$PortalDst = "\textures\portals"} else {$PortalDst = "\textures\objects"}
+    $PortalDst = "\textures\portals"
     $FileTypes = @(".bmp",".dds",".exr",".hdr",".jpg",".jpeg",".png",".tga",".svg",".svgz")
     
     # Set up an array of wildcard patterns that includes each extension in $FileTypes
@@ -360,9 +360,10 @@ Function InvalidExit {
 
         # Copy Objects
         foreach ($Object in $NewObjects) {
-            <# Info #> "    Copying " + $Object.fullname + "..."
             $CopySource = $Object.fullname
             $CopyDestination = $Object.fullname.replace($Source,$ReplaceSource)
+            <# Info #> "    Copying from " + $CopySource
+            <# Info #> "              to " + $CopyDestination
             Copy-Item $CopySource $CopyDestination | Out-Null
         } # foreach ($Object in $NewObjects)
         <# Info #> ""
@@ -373,20 +374,40 @@ Function InvalidExit {
         <# Info #> "    Replicating folder structure for portals..."
         $PortalFolderList = $NewPortals.Directory.fullname | Select -Unique
         foreach ($Folder in $PortalFolderList) {
+        
+        if ($Portals) {
             If ($folder.contains($PortalDst)) {
+                $PortalSource = $Source
                 $ReplaceSource = $Destination
+            } elseif ($folder.contains($ObjectDst)) {
+                $PortalSource = $Source + $ObjectDst
+                $ReplaceSource = $Destination + $PortalDst
             } else {
+                $PortalSource = $Source
                 $ReplaceSource = $Destination + $PortalDst
             } # If ($folder.contains($ObjectDst))
+        } elseif (-not $Portals) {
+            If ($folder.contains($PortalDst)) {
+                $PortalSource = $Source + $PortalDst
+                $ReplaceSource = $Destination + $ObjectDst
+            } elseif ($folder.contains($ObjectDst)) {
+                $PortalSource = $Source
+                $ReplaceSource = $Destination 
+            } else {
+                $PortalSource = $Source
+                $ReplaceSource = $Destination + $ObjectDst
+            } # If ($folder.contains($ObjectDst))
+        } # if ($Portals)
 
-            $FolderDst = $Folder.replace($Source,$ReplaceSource)
+            $FolderDst = $Folder.replace($PortalSource,$ReplaceSource)
             if (-not (Test-Path $FolderDst)) {New-Item $FolderDst -ItemType Directory | Out-Null}
         } # foreach ($Folder in $ObjectFolderList)
 
         foreach ($Object in $NewPortals) {
-            <# Info #> "    Copying " + $Object.fullname + "..."
             $CopySource = $Object.fullname
-            $CopyDestination = $Object.fullname.replace($Source,$ReplaceSource)
+            $CopyDestination = $Object.fullname.replace($PortalSource,$ReplaceSource)
+            <# Info #> "    Copying from " + $CopySource
+            <# Info #> "              to " + $CopyDestination
             Copy-Item $CopySource $CopyDestination | Out-Null
         } # foreach ($Object in $NewPortals)
         <# Info #> ""
