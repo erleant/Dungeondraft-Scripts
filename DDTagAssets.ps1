@@ -195,7 +195,13 @@ Function InvalidExit {
 # Main {
     $StartNow = Get-Date
     $ScriptName = "DDTagAssets"
-    $Version = 8
+    $Version = 9
+
+    if (Test-Path $Source\textures\objects) {
+        $SourceObject = [System.IO.DirectoryInfo]$Source
+        $Source = $SourceObject.Parent.FullName
+        $Include = $SourceObject.Name
+    }
 
     if (($Include -eq "*") -or ($Include -eq "")) {$Manifest = "all folders"} else {$Manifest = "$Include"}
     <# Info #> ""
