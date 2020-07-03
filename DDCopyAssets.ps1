@@ -68,32 +68,37 @@ function Test-ValidPathName {
 Function ValidateInput ($Src,$Dst,$Tag,$Prt) {
 
     if ($Src -eq "") {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    No value specified for Source."
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    No value specified for Source.")
         return $ReturnValue
     } # if ($Src -eq "")
 
     if (-not (Test-ValidPathName $Src)) {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    Invalid path name for Source: $Src"
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    Invalid path name for Source: $Src")
         return $ReturnValue
     } # if (-not (Test-ValidPathName $Src))
 
     if (-not (Test-Path $Src)) {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    Cannot find Source: $Src."
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    Cannot find Source: $Src.")
         return $ReturnValue
     } # if (-not (Test-Path $Src))
 
     if ($Dst -eq "") {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    No value specified for Destination."
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    No value specified for Destination.")
         return $ReturnValue
     } # if ($Src -eq "")
 
     if (-not (Test-ValidPathName $Dst)) {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    Invalid path name for Destination: $Dst"
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    Invalid path name for Destination: $Dst")
         return $ReturnValue
     } # if (-not (Test-ValidPathName $Dst))
 
@@ -109,8 +114,9 @@ Function ValidateInput ($Src,$Dst,$Tag,$Prt) {
         "$false" {}
         $false {}
         default {
-            [array]$ReturnValue = $false
-            [array]$ReturnValue += '    CreateTagFile must be True or False'
+            $ReturnValue = [System.Collections.ArrayList]@()
+            [void]$ReturnValue.Add($false)
+            [void]$ReturnValue.Add('    CreateTagFile must be True or False')
             return $ReturnValue
         } # default
     } # Switch ($Tag)
@@ -127,8 +133,9 @@ Function ValidateInput ($Src,$Dst,$Tag,$Prt) {
         "$false" {}
         $false {}
         default {
-            [array]$ReturnValue = $false
-            [array]$ReturnValue += '    Portals must be True or False'
+            $ReturnValue = [System.Collections.ArrayList]@()
+            [void]$ReturnValue.Add($false)
+            [void]$ReturnValue.Add('    Portals must be True or False')
             return $ReturnValue
         } # default
     } # Switch ($Tag)
@@ -152,83 +159,85 @@ Function StringToBool ($Str) {
 } # Function StringToBool
 
 Function Check-Dependencies {
-    param([array]$DepList)
+    param([System.Collections.ArrayList]$DepList)
 
     foreach ($Dep in $DepList) {
         if (-not (Test-Path $Dep)) {
-            [array]$ReturnValue = $false
-            [array]$ReturnValue += "    Missing dependendy: $Dep"
+            $ReturnValue = [System.Collections.ArrayList]@()
+            [void]$ReturnValue.Add($false)
+            [void]$ReturnValue.Add("    Missing dependendy: $Dep")
             return $ReturnValue
         } # foreach ($Dep in $DepList)
     } # foreach ($Dep in $DepList)
 } # Function Check-Dependencies
 
 Function InvalidExit {
-    <# Info #> ""
-    <# Info #> "SYNTAX"
-    <# Info #> "    $PSScriptRoot\DDCopyAssets.ps1 [[-Source] <String>] [[-Destination] <String>] [[-CreateTagFile] <String>] [[-Portals] <String>]"
-    <# Info #> ""
-    <# Info #> "REMARKS"
-    <# Info #> "    To see the examples, type: ""get-help $PSScriptRoot\DDCopyAssets.ps1 -examples""."
-    <# Info #> "    For more information, type: ""get-help $PSScriptRoot\DDCopyAssets.ps1 -detailed""."
-    <# Info #> "    For technical information, type: ""get-help $PSScriptRoot\DDCopyAssets.ps1 -full""."
-    <# Info #> ""
-    <# Info #> "REQUIRED DEPENDENCIES"
-    <# Info #> "    $PSScriptRoot\DDTagAssets.ps1"
-    <# Info #> ""
+    Write-Output ""
+    Write-Output "SYNTAX"
+    Write-Output "    $PSScriptRoot\DDCopyAssets.ps1 [[-Source] <String>] [[-Destination] <String>] [[-CreateTagFile] <String>] [[-Portals] <String>]"
+    Write-Output ""
+    Write-Output "REMARKS"
+    Write-Output "    To see the examples, type: ""get-help $PSScriptRoot\DDCopyAssets.ps1 -examples""."
+    Write-Output "    For more information, type: ""get-help $PSScriptRoot\DDCopyAssets.ps1 -detailed""."
+    Write-Output "    For technical information, type: ""get-help $PSScriptRoot\DDCopyAssets.ps1 -full""."
+    Write-Output ""
+    Write-Output "REQUIRED DEPENDENCIES"
+    Write-Output "    $PSScriptRoot\DDTagAssets.ps1"
+    Write-Output ""
     Exit
 } # Function InvalidExit
 
 # Main {
     $StartNow = Get-Date
-    $ScriptName = "DDCopyAssets"
-    $Version = 5
+    $ScriptName = "DDCopyAssets.ps1"
+    $Version = 6
 
-    <# Info #> ""
-    <# Info #> "### Starting $ScriptName V.$Version at $StartNow"
-    <# Info #> ""
+    Write-Output ""
+    Write-Output "### Starting $ScriptName V.$Version at $StartNow"
+    Write-Output ""
 
-    $Validate = @()
+    $Validate = [System.Collections.ArrayList]@()
     $Validate = ValidateInput $Source $Destination $CreateTagFile $Portals
     if ($Validate.count -ge 1) {
         $Valid = $Validate[0]
         $ExitMessage = $Validate[1]
         If (-not $Valid) {
-            <# Info #> $ExitMessage
-            <# Info #> "### Exiting script due to invalid input."
-            <# Info #> ""
+            Write-Output $ExitMessage
+            Write-Output "### Exiting script due to invalid input."
+            Write-Output ""
             InvalidExit
         } # If (-not $Valid)
     } else {
-        <# Info #> "    Input validated."
+        Write-Output "    Input validated."
     } # if ($Validate.count -ge 1)
 
-    [Array]$Dependencies = ($PSScriptRoot + "\DDTagAssets.ps1")
-    $Validate = @()
+    $Dependencies = [System.Collections.ArrayList]@()
+    [void]$Dependencies.Add($PSScriptRoot + "\DDTagAssets.ps1")
+    $Validate = [System.Collections.ArrayList]@()
     $Validate = Check-Dependencies $Dependencies
     if ($Validate.count -ge 1) {
         $Valid = $Validate[0]
         $ExitMessage = $Validate[1]
         If (-not $Valid) {
-            <# Info #> $ExitMessage
-            <# Info #> "### Exiting script due to missing dependency."
-            <# Info #> ""
+            Write-Output $ExitMessage
+            Write-Output "### Exiting script due to missing dependency."
+            Write-Output ""
             InvalidExit
         } # If (-not $Valid)
     } else {
-        <# Info #> "    Dependencies validated."
+        Write-Output "    Dependencies validated."
     }# if ($Validate.count -ge 1)
 
     [bool]$CreateTagFile = StringToBool $CreateTagFile
     [bool]$Portals = StringToBool $Portals
 
-    <# Info #> ""
-    <# Info #> "    Source: $Source"
-    <# Info #> "    Destination: $Destination"
-    <# Info #> "    Create tag file: $CreateTagFile"
-    <# Info #> "    Copy doors and windows to the portals folder instead of the objects folder: $Portals"
-    <# Info #> "        (This works based on the filename starting with ""Door "", ""Doors "", ""Window "" or ""Windows "")"
-    <# Info #> ""
+    Write-Output ""
+    Write-Output "    Source: $Source"
+    Write-Output "    Destination: $Destination"
+    Write-Output "    Create tag file: $CreateTagFile"
+    Write-Output "    Copy doors and windows to the portals folder instead of the objects folder: $Portals"
+    Write-Output "        (This works based on the filename starting with ""Door "", ""Doors "", ""Window "" or ""Windows "")"
+    Write-Output ""
 
     # Initialize some variables
     $ParentSrc = $source
@@ -303,48 +312,48 @@ Function InvalidExit {
 
     # Get all objects of very high quality (files designated as "_VH.*")
     #     and store the base names in $VHNames for later comparison
-    <# Info #> "    Collecting names of very-high-quality objects for later comparison."
+    Write-Output "    Collecting names of very-high-quality objects for later comparison."
     $VHNames = Get-ChildItem -Recurse -File -Include $VHWildcards $Source
     $VHNames = $VHNames.Name
     foreach ($Extension in $FileTypes){$VHNames = $VHNames -replace "_VH$Extension"}
 
     # Get all objects of high quality (files designated as "_HI.*")
     #     and store the base names in $HINames for later comparison
-    <# Info #> "    Collecting names of high-quality objects for later comparison."
+    Write-Output "    Collecting names of high-quality objects for later comparison."
     $HINames = Get-ChildItem -Recurse -File -Include $HIWildcards $Source
     $HINames = $HINames.Name
     foreach ($Extension in $FileTypes){$HINames = $HINames -replace "_HI$Extension"}
 
 
     # Get all very-high-quality objects, excluding doors and windows.
-    <# Info #> "    Collecting objects of very high quality (excluding doors and windows)..."
+    Write-Output "    Collecting objects of very high quality (excluding doors and windows)..."
     $NewObjects = Get-ChildItem -Recurse -File -Include $VHWildcards -Exclude $PortalWildcards $Source
 
     # Get all high-quality objects, excluding doors and windows, that are not duplicates of very-high-quality objects.
-    <# Info #> "    Collecting objects of high quality (excluding doors and windows) that are not duplicates of very high quality objects..."
+    Write-Output "    Collecting objects of high quality (excluding doors and windows) that are not duplicates of very high quality objects..."
     $NewObjects += Get-ChildItem -Recurse -File -Include $HIWildcards -Exclude $PortalWildcards $Source | Where-Object {(($_.Name -replace $_.Extension -replace "_HI") -notin $VHNames)}
     
     # Get all standard-quality objects, excluding doors and windows, that are not duplicates of very-high-quality objects or high-quality objects.
-    <# Info #> "    Collecting objects of standard quality (excluding doors and windows) that are not duplicates of very high quality or high quality objects..."
+    Write-Output "    Collecting objects of standard quality (excluding doors and windows) that are not duplicates of very high quality or high quality objects..."
     $ExcludeWildcards = $StandardWildcards += $PortalWildcards
     $NewObjects += Get-ChildItem -Recurse -File -Include $Wildcards -Exclude $ExcludeWildcards $Source | Where-Object {(($_.Name -replace $_.Extension) -notin $VHNames) -and (($_.Name -replace $_.Extension) -notin $HINames)}
 
     # Get all very-high-quality doors and windows.
-    <# Info #> "    Collecting doors and windows of very high quality..."
+    Write-Output "    Collecting doors and windows of very high quality..."
     $NewPortals = Get-ChildItem -Recurse -File -Include $VHPortalWildcards $Source
 
     # Get all high-quality doors and windows that are not duplicates of very-high-quality doors and windows.
-    <# Info #> "    Collecting doors and windows of high quality that are not duplicates of high quality objects..."
+    Write-Output "    Collecting doors and windows of high quality that are not duplicates of high quality objects..."
     $NewPortals += Get-ChildItem -Recurse -File -Include $HIPortalWildcards $Source | Where-Object {(($_.Name -replace $_.Extension -replace "_HI") -notin $VHNames)}
     
     # Get all standard-quality doors and windows that are not duplicates of very-high-quality doors and windows or high-quality doors and windows.
-    <# Info #> "    Collecting doors and windows of standard quality that are not duplicates of very high quality or high quality objects..."
-    $NewPortals += Get-ChildItem -Recurse -File -Include $PortalWildcards -Exclude $LOPortalWildcards $Source | Where-Object {(($_.Name -replace $_.Extension) -notin $VHNames) -and (($_.Name -replace $_.Extension) -notin $HINames)}
-    <# Info #> ""
+    Write-Output "    Collecting doors and windows of standard quality that are not duplicates of very high quality or high quality objects..."
+    $NewPortals += Get-ChildItem -Recurse -File -Include $PortalWildcards -Exclude $LOPortalWildcards $Source | Where-Object {(($_.Name -replace $_.Extension -replace "_VH") -notin $VHNames) -and (($_.Name -replace $_.Extension -replace "_HI") -notin $HINames)}
+    Write-Output ""
 
     # Process objects
     if ($NewObjects.count -ge 1) {
-        <# Info #> "    Replicating folder structure for objects..."
+        Write-Output "    Replicating folder structure for objects..."
 
         $ObjectFolderList = $NewObjects.Directory.fullname | Select -Unique
         foreach ($Folder in $ObjectFolderList) {
@@ -362,16 +371,16 @@ Function InvalidExit {
         foreach ($Object in $NewObjects) {
             $CopySource = $Object.fullname
             $CopyDestination = $Object.fullname.replace($Source,$ReplaceSource)
-            <# Info #> "    Copying from " + $CopySource
-            <# Info #> "              to " + $CopyDestination
+            Write-Output ("    Copying from " + $CopySource)
+            Write-Output ("              to " + $CopyDestination)
             Copy-Item $CopySource $CopyDestination | Out-Null
         } # foreach ($Object in $NewObjects)
-        <# Info #> ""
+        Write-Output ""
     } # if ($NewObjects.count -ge 1)
 
     # Process doors and windows
     if ($NewPortals.count -ge 1) {
-        <# Info #> "    Replicating folder structure for portals..."
+        Write-Output "    Replicating folder structure for portals..."
         $PortalFolderList = $NewPortals.Directory.fullname | Select -Unique
         foreach ($Folder in $PortalFolderList) {
         
@@ -406,11 +415,11 @@ Function InvalidExit {
         foreach ($Object in $NewPortals) {
             $CopySource = $Object.fullname
             $CopyDestination = $Object.fullname.replace($PortalSource,$ReplaceSource)
-            <# Info #> "    Copying from " + $CopySource
-            <# Info #> "              to " + $CopyDestination
+            Write-Output ("    Copying from " + $CopySource)
+            Write-Output ("              to " + $CopyDestination)
             Copy-Item $CopySource $CopyDestination | Out-Null
         } # foreach ($Object in $NewPortals)
-        <# Info #> ""
+        Write-Output ""
     } # if ($NewPortals.count -ge 1)
 
     # If $CreateTagFile is true, run DDAssetTags7.ps1 to create the tag file. 
@@ -418,15 +427,15 @@ Function InvalidExit {
         $workingfolder = [System.IO.DirectoryInfo]$ParentDst
         $packlocation = $workingfolder.Parent.FullName 
         $assetfolders = $workingfolder.Name
-        <# Info #> "    Passing control to DDTagAssets to create tag files for $ParentSrc..."
+        Write-Output "    Passing control to DDTagAssets to create tag files for $ParentSrc..."
         & $PSSCriptRoot\DDTagAssets.ps1 $packlocation $assetfolders
-        <# Info #> "    Retaking control from DDTagAssets."
+        Write-Output "    Retaking control from DDTagAssets."
+        Write-Output ""
     } # if ($CreateTagFile)
 
-    <# Info #> ""
-    <# Info #> "    Finished copying assets."
-    <# Info #> $EndNow = Get-Date
-    <# Info #> $RunTime = $EndNow - $StartNow
-    <# Info #> "### Ending $ScriptName V.$Version at $EndNow with a run time of " + ("{0:hh\:mm\:ss}" -f $RunTime)
-    <# Info #> ""
+    Write-Output "    Finished copying assets."
+    $EndNow = Get-Date
+    $RunTime = $EndNow - $StartNow
+    Write-Output ("### Ending $ScriptName V.$Version at $EndNow with a run time of " + ("{0:hh\:mm\:ss}" -f $RunTime))
+    Write-Output ""
 # } Main

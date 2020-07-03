@@ -128,34 +128,39 @@ function Test-ValidFileName {
 Function ValidateInput ($Src,$IncList,$ExcList) {
 
     if ($Src -eq "") {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    No value specified for Source."
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    No value specified for Source.")
         return $ReturnValue
     } # if ($Src -eq "")
 
     if (-not (Test-ValidPathName $Src)) {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    Invalid path name for Source: $Src"
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    Invalid path name for Source: $Src")
         return $ReturnValue
     } # if (-not (Test-ValidPathName $Src))
 
     if (-not (Test-Path $Src)) {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    Cannot find Source: $Src."
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    Cannot find Source: $Src.")
         return $ReturnValue
     } # if (-not (Test-Path $Src))
 
     if ($IncList.count -ge 1) {
         foreach ($folder in $IncList.Split(",")) {
             if (-not (Test-ValidFileName $folder)) {
-                [array]$ReturnValue = $false
-                [array]$ReturnValue += "    Invalid folder name in inclusion list: $folder"
+                $ReturnValue = [System.Collections.ArrayList]@()
+                [void]$ReturnValue.Add($false)
+                [void]$ReturnValue.Add("    Invalid folder name in inclusion list: $folder")
                 return $ReturnValue
             } # if (-not (Test-ValidPathName $Src))
 
             if (-not (Test-Path $Src\$folder)) {
-                [array]$ReturnValue = $false
-                [array]$ReturnValue += "    Included folder name not found: $folder"
+                $ReturnValue = [System.Collections.ArrayList]@()
+                [void]$ReturnValue.Add($false)
+                [void]$ReturnValue.Add("    Included folder name not found: $folder")
                 return $ReturnValue
             } # if (-not (Test-ValidPathName $Src))
         } # foreach ($Pck in $IncList)
@@ -164,14 +169,16 @@ Function ValidateInput ($Src,$IncList,$ExcList) {
     if ($ExcList.count -ge 1) {
         foreach ($folder in $ExcList.Split(",")) {
             if (-not (Test-ValidFileName $folder)) {
-                [array]$ReturnValue = $false
-                [array]$ReturnValue += "    Invalid folder name in exclusion list: $folder"
+                $ReturnValue = [System.Collections.ArrayList]@()
+                [void]$ReturnValue.Add($false)
+                [void]$ReturnValue.Add("    Invalid folder name in exclusion list: $folder")
                 return $ReturnValue
             } # if (-not (Test-ValidPathName $Src))
 
             if (-not (Test-Path $Src\$folder)) {
-                [array]$ReturnValue = $false
-                [array]$ReturnValue += "    Excluded folder file not found: $folder"
+                $ReturnValue = [System.Collections.ArrayList]@()
+                [void]$ReturnValue.Add($false)
+                [void]$ReturnValue.Add("    Excluded folder file not found: $folder")
                 return $ReturnValue
             } # if (-not (Test-ValidPathName $Src))
         } # foreach ($Pck in $ExcList)
@@ -180,22 +187,44 @@ Function ValidateInput ($Src,$IncList,$ExcList) {
 } # Function ValidateInput
 
 Function InvalidExit {
-    <# Info #> ""
-    <# Info #> "SYNTAX"
-    <# Info #> "    $PSScriptRoot\DDTagAssets.ps1 [[-Source] <String>] [[-Include] <String>] [[-Exclude] <String>] [[-DefaultTag] <String>]"
-    <# Info #> ""
-    <# Info #> "REMARKS"
-    <# Info #> "    To see the examples, type: ""get-help $PSScriptRoot\DDTagAssets.ps1 -examples""."
-    <# Info #> "    For more information, type: ""get-help $PSScriptRoot\DDTagAssets.ps1 -detailed""."
-    <# Info #> "    For technical information, type: ""get-help $PSScriptRoot\DDTagAssets.ps1 -full""."
-    <# Info #> ""
+    Write-Output ""
+    Write-Output "SYNTAX"
+    Write-Output "    $PSScriptRoot\DDTagAssets.ps1 [[-Source] <String>] [[-Include] <String>] [[-Exclude] <String>] [[-DefaultTag] <String>]"
+    Write-Output ""
+    Write-Output "REMARKS"
+    Write-Output "    To see the examples, type: ""get-help $PSScriptRoot\DDTagAssets.ps1 -examples""."
+    Write-Output "    For more information, type: ""get-help $PSScriptRoot\DDTagAssets.ps1 -detailed""."
+    Write-Output "    For technical information, type: ""get-help $PSScriptRoot\DDTagAssets.ps1 -full""."
+    Write-Output ""
     Exit
 } # Function InvalidExit
 
 # Main {
     $StartNow = Get-Date
-    $ScriptName = "DDTagAssets"
-    $Version = 9
+    $ScriptName = "DDTagAssets.ps1"
+    $Version = 10
+
+
+    if (($Include -eq "*") -or ($Include -eq "")) {$Manifest = "all folders"} else {$Manifest = "$Include"}
+    Write-Output ""
+    Write-Output "### Starting $ScriptName V.$Version at $StartNow"
+    Write-Output ""
+
+    if ($Include -eq "*") {$IncludeList = ""} else {$IncludeList = $Include.Split(",")}
+    $ExcludeList = $Exclude
+    $Validate = [System.Collections.ArrayList]@()
+    $Validate = ValidateInput $Source $IncludeList $ExcludeList
+    if ($Validate.count -ge 1) {
+        $Valid = $Validate[0]
+        $ExitMessage = $Validate[1]
+        If (-not $Valid) {
+            Write-Output $ExitMessage
+            Write-Output "### Exiting script due to invalid input."
+            InvalidExit
+        } # If (-not $Valid)
+    } else {
+        Write-Output "    Input validated."
+    } # if ($Validate.count -ge 1)
 
     if (Test-Path $Source\textures\objects) {
         $SourceObject = [System.IO.DirectoryInfo]$Source
@@ -203,33 +232,12 @@ Function InvalidExit {
         $Include = $SourceObject.Name
     }
 
-    if (($Include -eq "*") -or ($Include -eq "")) {$Manifest = "all folders"} else {$Manifest = "$Include"}
-    <# Info #> ""
-    <# Info #> "### Starting $ScriptName V.$Version at $StartNow"
-    <# Info #> ""
-
-    if ($Include -eq "*") {$IncludeList = ""} else {$IncludeList = $Include.Split(",")}
-    $ExcludeList = $Exclude
-    $Validate = @()
-    $Validate = ValidateInput $Source $IncludeList $ExcludeList
-    if ($Validate.count -ge 1) {
-        $Valid = $Validate[0]
-        $ExitMessage = $Validate[1]
-        If (-not $Valid) {
-            <# Info #> $ExitMessage
-            <# Info #> "### Exiting script due to invalid input."
-            InvalidExit
-        } # If (-not $Valid)
-    } else {
-        <# Info #> "    Input validated."
-    } # if ($Validate.count -ge 1)
-
-    <# Info #> ""
-    <# Info #> "    Source: $Source"
-    <# Info #> "    Folders to Include: $Manifest"
-    <# Info #> "    Folders to exclude: $Exclude"
-    <# Info #> "    Default tag for root objects: $DefaultTag"
-    <# Info #> ""
+    Write-Output ""
+    Write-Output "    Source: $Source"
+    Write-Output "    Folders to Include: $Manifest"
+    Write-Output "    Folders to exclude: $Exclude"
+    Write-Output "    Default tag for root objects: $DefaultTag"
+    Write-Output ""
 
     # Set the output file encoding to UTF8, otherwise Dungeondraft will crash.
     $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
@@ -251,8 +259,8 @@ Function InvalidExit {
         $Manifest = $Include
     } # if (($Include -eq "*") -or ($Include -eq ""))
 
-    <# Info #> "    Starting tag file creation for $Manifest within $Source"
-    <# Info #> ""
+    Write-Output "    Starting tag file creation for $Manifest within $Source"
+    Write-Output ""
 
     # Set some variables
     $tags = "tags"
@@ -261,175 +269,76 @@ Function InvalidExit {
 
     # Iterate through each folder in the $PackList array.
     foreach ($Packfolder in $PackList) {
-        <# Info #> "    Starting $Packfolder..."
+        Write-Output "    Starting $Packfolder..."
 
         # Initialize some variables
         $TagObject = [PSCustomObject]@{}
         $FolderObject = [PSCustomObject]@{}
         $ColorableTag = [PSCustomObject]@{}
         $SetList = [PSCustomObject]@{}
-        $AllColorableAssets = @()
-        $SetArrayList = @()
-        $ParsedList = @()
-        $ParsedColor = @()
-        $NewList = @()
+
 
         # Set the folder and file locations.
         $Objects = "$Source\$Packfolder\textures\objects"
-
+   
         # Only proceed if $Objects is a valid path
         if (Test-Path $Objects) {
+            Write-Output "    Getting subfolders."
+            [array]$Subfolders = (Get-ChildItem $Objects -Directory).Name
 
-            # If a value has been specified for $DefaultTag,
-            #     Process all the objects in the root folder, if there are any.
-            $Objects = Get-Item "$Source\$Packfolder\textures\objects"
-            if ($DefaultTag -ne "") {
-                <# Info #> "        Processing " + $Objects.FullName + "..."
-                $PartToRemove = $Objects.Parent.Parent.FullName + "\"
-                $FileList = Get-ChildItem $Objects -File 
-                if ($FileList.count -ge 1) {
+            Write-Output "    Getting root objects."
+            [array]$RootObjects = (Get-ChildItem $Objects -File).FullName
+            if (($DefaultTag -ne "") -and ($RootObjects.Count -ge 1)) {
+                [array]$tagsetmembers = $DefaultTag
+                [array]$tagsetmembers += $Subfolders
 
-                    # Get the list of file names, truncate everything before "textures\objects",
-                    #     then replace all the backslashes with forward slashes.
-                    [Array]$NewList += $FileList.FullName
-                    [Array]$ParsedList += [Array]$NewList.Replace($PartToRemove, '').Replace('\', '/')
+                [array]$RootObjects = (Get-ChildItem $Objects -File).FullName
+                if (Test-Path $Objects\Colorable) {
+                    [array]$RootObjects += (Get-ChildItem $Objects\Colorable -File).FullName
+                } # if (Test-Path $Objects\Colorable)
 
-                    # Add the $DefaultTag value to the array list to be used for tag sets.
-                    $SetArrayList += $DefaultTag
-                } # if ($FileList.count -ge 1)
-
-
-                # Process the "Colorable" folder in the root folder, if there is one. 
-                $ColorableFolder = "$Objects\Colorable"
-                # $ColorList = @()
-                # $ParsedColor = @()
-                # $ParsedList = @()
-                If (Test-Path $ColorableFolder) {
-                    $ColorableObjects = Get-ChildItem $ColorableFolder -File 
-                    If ($ColorableObjects.count -ge 1) {
-                        # Get the list of colorable file names, truncate everything before "textures\objects",
-                        #     then replace all the backslashes with forward slashes.
-                        $ColorList = $ColorableObjects.FullName
-                        [Array]$ParsedColor += $ColorList.Replace($PartToRemove, '').Replace('\', '/')
-
-                        # Add the colorable file names for the root folder to the list of other file names in the root folder.
-                        [Array]$ParsedList += [Array]$ParsedList + [Array]$ParsedColor
-
-                        # Keep a list of all colorable file names for this asset pack to add them all to the "Colorable" tag.
-                        $AllColorableAssets += [Array]$ParsedColor
-                    } # If ($ColorableObjects.count -gt 1)
-                } # If (Test-Path $ColorableFolder)
-
-                # If there were any objects in the root folder, add the file names to the $FolderObject as a value of the $DefaultTag property.
-                if ([Array]$ParsedList.Count -ge 1) {Add-Member -InputObject $FolderObject -NotePropertyName $DefaultTag -NotePropertyValue $ParsedList}
+                [array]$ParsedRoot = [array]$RootObjects -replace [Regex]::Escape("$Source\$Packfolder\") -replace [Regex]::Escape("\"),[Regex]::Escape("/")
+                Add-Member -InputObject $FolderObject -NotePropertyName $DefaultTag -NotePropertyValue $ParsedRoot
             } else {
-                <# Info #> "        Processing " + $Objects.FullName + "..."
-                $PartToRemove = $Objects.Parent.Parent.FullName + "\"
+                [array]$tagsetmembers += $Subfolders
+            } # if (($DefaultTag -ne "") -and ($RootObjects.Count -ge 1))
 
-                # Process the "Colorable" folder in the root folder, if there is one. 
-                $ColorableFolder = "$Objects\Colorable"
-                # $ColorList = @()
-                # $ParsedColor = @()
-                # $ParsedList = @()
-                If (Test-Path $ColorableFolder) {
-                    $ColorableObjects = Get-ChildItem $ColorableFolder -File 
-                    If ($ColorableObjects.count -ge 1) {
-                        # Get the list of colorable file names, truncate everything before "textures\objects",
-                        #     then replace all the backslashes with forward slashes.
-                        $ColorList = $ColorableObjects.FullName
-                        [Array]$ParsedColor += $ColorList.Replace($PartToRemove, '').Replace('\', '/')
-
-                        # Add the colorable file names for the root folder to the list of other file names in the root folder.
-                        [Array]$ParsedList += [Array]$ParsedList + [Array]$ParsedColor
-
-                        # Keep a list of all colorable file names for this asset pack to add them all to the "Colorable" tag.
-                        $AllColorableAssets += [Array]$ParsedColor
-                    } # If ($ColorableObjects.count -gt 1)
-                } # If (Test-Path $ColorableFolder)
-
-                # If there were any objects in the root folder, add the file names to the $FolderObject as a value of the $DefaultTag property.
-            } # if ($DefaultTag -ne "")
-
-            # Process each subfolder in the root folder (except for the "Colorable" folder, which we've already processed).
-            $Parent = Get-ChildItem $Objects -Directory -Exclude "colorable"
-            foreach ($folder in $Parent) {
-                <# Info #> "        Processing " + $folder.fullname + "..."
-                $PartToRemove = $folder.Parent.Parent.Parent.FullName + "\"
-
-                $FileList = Get-ChildItem $folder.FullName -Recurse -File
-                if ($FileList.count -ge 1) {
-                    # Get the list of file names, truncate everything before "textures\objects",
-                    #     then replace all the backslashes with forward slashes.
-                    [Array]$NewList = $FileList.FullName
-                    [Array]$ParsedList = [Array]$NewList.Replace($PartToRemove, '').Replace('\', '/')
-                } # if ($FileList.count -ge 1)
-                
-                
-                # Process the "Colorable" folders in the given subfolder.
-                $ColorableFolders = Get-ChildItem -Recurse -Directory $folder.fullname -Filter "Colorable"
-                if ($ColorableFolders.Count -ge 1) {
-                    $ColorableObjects = Get-ChildItem $ColorableFolders.FullName -Recurse -File
-                    $ColorList = @()
-                    $ParsedColor = @()
-                    If ($ColorableObjects.count -ge 1) {
-                        # Get the list of colorable file names, truncate everything before "textures\objects",
-                        #     then replace all the backslashes with forward slashes.
-                        $ColorList = $ColorableObjects.FullName
-                        [Array]$ParsedColor = $ColorList.Replace($PartToRemove, '').Replace('\', '/')
-    
-                        # Add the colorable file names for this subfolder to the list of other file names in this subfolder.
-                        [Array]$ParsedList = [Array]$ParsedList + [Array]$ParsedColor
-
-                        # Keep a list of all colorable file names for this asset pack to add them all to the "Colorable" tag.
-                        $AllColorableAssets += [Array]$ParsedColor
-                    }
-                } # If ($ColorableObjects.count -ge 1)
-
-                # Add the file names from this subfolder to the $FolderObject as a value of the subfolder's name (the subfolder's name being the property).
-                $name = $folder.Name
-                Add-Member -InputObject $FolderObject -NotePropertyName $name -NotePropertyValue $ParsedList
+            Write-Output "    Getting all objects from all subfolders."
+            [array]$AllObjects = (Get-ChildItem $Objects -File -Recurse).FullName
+            [array]$AllColorableObjects = [array]$AllObjects | Where-Object {$_.ToLower().Contains("\colorable\")}
+            [array]$ParsedObjects = [array]$AllObjects -replace [Regex]::Escape("$Source\$Packfolder\") -replace [Regex]::Escape("\"),[Regex]::Escape("/")
+            if ($AllColorableObjects.count -ge 1) {
+                [array]$ParsedColorableObjects = [array]$AllColorableObjects -replace [Regex]::Escape("$Source\$Packfolder\") -replace [Regex]::Escape("\"),[Regex]::Escape("/")
+            }
             
-            } # foreach ($folder in $Parent)
+            Write-Output "    Creating tags file content."
+            foreach ($folder in $Subfolders | Where-Object {$_.ToLower() -ne "colorable"}) {
+                Add-Member -InputObject $FolderObject -NotePropertyName $folder -NotePropertyValue @($ParsedObjects | Where-Object {$_.Contains("/$folder/")})
+            }
 
-  
-            if ($FolderObject -ne $null) {$AssetCount = ($FolderObject | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name).count}
-            if ($AllColorableAssets -ne $null) {$ColorableCount = $AllColorableAssets.count}
-            if (($AssetCount -ge 1) -or ($ColorableCount -ge 1)) {
-                <# Info #> "        Creating $tagfile for " + $folder.FullName + "..."
+            if ($ParsedColorableObjects.Count -ge 1) {
+                Add-Member -InputObject $FolderObject -NotePropertyName $colorable -NotePropertyValue @($ParsedColorableObjects)
+            }
 
-                # Add the $FolderObject (containing all subfolders processed in the above loop) to the $TagObject as a value of the $tags property
-                Add-Member -InputObject $TagObject -NotePropertyName $tags -NotePropertyValue $FolderObject
+            Add-Member -InputObject $TagObject -NotePropertyName $tags -NotePropertyValue $FolderObject
+            Add-Member -InputObject $SetList -NotePropertyName $Packfolder -NotePropertyValue $tagsetmembers
+            Add-Member -InputObject $TagObject -NotePropertyName $sets -NotePropertyValue $SetList
 
-                # If we collected any colorable assets, add $AllColorableAssets to the $FolderObject as a value of the $colorable property
-                if ($AllColorableAssets.Count -ge 1) {Add-Member -InputObject $FolderObject -NotePropertyName $colorable -NotePropertyValue $AllColorableAssets}
-        
-                # If there were any subfolders under the root, add them to the array list to be used for tag sets,
-                #     then add the $SetArrayList to the $SetList object as a value of the $Packfolder property.
-                if ($Parent.Count -ge 1) {$SetArrayList += $Parent.Name}
-                if ($SetArrayList.Count -ge 1) {Add-Member -InputObject $SetList -NotePropertyName $Packfolder -NotePropertyValue $SetArrayList}
-
-                # Add the $SetList to the $TagObject as a value of the $sets property.
-                Add-Member -InputObject $TagObject -NotePropertyName $sets -NotePropertyValue $SetList
-
-                # Write the $TagObject to JSON, and write the JSON to the proper file in the proper location.
-                $datafolder = "$Source\$Packfolder\data"
-                if (-not (Test-Path $datafolder)) {New-Item $datafolder -ItemType "directory" | Out-Null}
-                $tagfile = "$datafolder\default.dungeondraft_tags"
-            
-                Set-Content $tagfile (ConvertTo-Json $TagObject) | Out-Null
-            } else {
-                <# Info #> "        Skipping tag file creation for " + $Packfolder.Name + "..."
-            } # if ($FolderObject.count -ge 1)
+            $datafolder = "$Source\$Packfolder\data"
+            $tagfile = "$datafolder\default.dungeondraft_tags"
+           `Write-Output "    Writing tags file to $tagfile."
+            if (-not (Test-Path $datafolder)) {New-Item $datafolder -ItemType "directory" | Out-Null}
+            Set-Content $tagfile (ConvertTo-Json $TagObject) | Out-Null
         
         } # if (Test-Path $Objects)
 
-        <# Info #> "    Finished with $Packfolder."
-        <# Info #> ""
+        Write-Output "    Finished with $Packfolder."
+        Write-Output ""
     } # foreach ($Packfolder in $PackList)
 
-    <# Info #> "    Ending tagfile creation for $Manifest within $Source"
-    <# Info #> $EndNow = Get-Date
-    <# Info #> $RunTime = $EndNow - $StartNow
-    <# Info #> "### Ending $ScriptName V.$Version at $EndNow with a run time of " + ("{0:hh\:mm\:ss}" -f $RunTime)
-    <# Info #> ""
+    Write-Output "    Ending tagfile creation for $Manifest within $Source"
+    $EndNow = Get-Date
+    $RunTime = $EndNow - $StartNow
+    Write-Output ("### Ending $ScriptName V.$Version at $EndNow with a run time of " + ("{0:hh\:mm\:ss}" -f $RunTime))
+    Write-Output ""
 # } Main

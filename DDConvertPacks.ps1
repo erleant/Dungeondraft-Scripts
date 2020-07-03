@@ -130,40 +130,53 @@ function Test-ValidFileName {
 Function ValidateInput ($Src,$Dst,$IncList,$ExcList,$Cln) {
 
     if ($Src -eq "") {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    No value specified for Source."
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    No value specified for Source.")
         return $ReturnValue
     } # if ($Src -eq "")
 
     if (-not (Test-ValidPathName $Src)) {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    Invalid path name for Source: $Src"
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    Invalid path name for Source: $Src")
         return $ReturnValue
     } # if (-not (Test-ValidPathName $Src))
 
     if (-not (Test-Path $Src)) {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    Cannot find Source: $Src."
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    Cannot find Source: $Src.")
         return $ReturnValue
     } # if (-not (Test-Path $Src))
 
+    if ($Dst -eq "") {
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    No value specified for Destination.")
+        return $ReturnValue
+    } # if ($Src -eq "")
+
     if (-not (Test-ValidPathName $Dst)) {
-        [array]$ReturnValue = $false
-        [array]$ReturnValue += "    Invalid path name for Destination: $Dst"
+        $ReturnValue = [System.Collections.ArrayList]@()
+        [void]$ReturnValue.Add($false)
+        [void]$ReturnValue.Add("    Invalid path name for Destination: $Dst")
         return $ReturnValue
     } # if (-not (Test-ValidPathName $Dst))
 
     if ($IncList.count -ge 1) {
         foreach ($Pck in $IncList.Split(",")) {
             if (-not (Test-ValidFileName $Pck)) {
-                [array]$ReturnValue = $false
-                [array]$ReturnValue += "    Invalid file name in inclusion list: $Pck"
+                $ReturnValue = [System.Collections.ArrayList]@()
+                [void]$ReturnValue.Add($false)
+                [void]$ReturnValue.Add("    Invalid file name in inclusion list: $Pck")
                 return $ReturnValue
             } # if (-not (Test-ValidPathName $Src))
 
             if (-not (Test-Path $Src\$Pck)) {
-                [array]$ReturnValue = $false
-                [array]$ReturnValue += "    Included pack file not found: $Pck"
+                $ReturnValue = [System.Collections.ArrayList]@()
+                [void]$ReturnValue.Add($false)
+                [void]$ReturnValue.Add("    Included pack file not found: $Pck")
                 return $ReturnValue
             } # if (-not (Test-ValidPathName $Src))
         } # foreach ($Pck in $IncList)
@@ -172,14 +185,16 @@ Function ValidateInput ($Src,$Dst,$IncList,$ExcList,$Cln) {
     if ($ExcList.count -ge 1) {
         foreach ($Pck in $ExcList.Split(",")) {
             if (-not (Test-ValidFileName $Pck)) {
-                [array]$ReturnValue = $false
-                [array]$ReturnValue += "    Invalid file name in exclusion list: $Pck"
+                $ReturnValue = [System.Collections.ArrayList]@()
+                [void]$ReturnValue.Add($false)
+                [void]$ReturnValue.Add("    Invalid file name in exclusion list: $Pck")
                 return $ReturnValue
             } # if (-not (Test-ValidPathName $Src))
 
             if (-not (Test-Path $Src\$Pck)) {
-                [array]$ReturnValue = $false
-                [array]$ReturnValue += "    Excluded pack file not found: $Pck"
+                $ReturnValue = [System.Collections.ArrayList]@()
+                [void]$ReturnValue.Add($false)
+                [void]$ReturnValue.Add("    Excluded pack file not found: $Pck")
                 return $ReturnValue
             } # if (-not (Test-ValidPathName $Src))
         } # foreach ($Pck in $ExcList)
@@ -197,8 +212,9 @@ Function ValidateInput ($Src,$Dst,$IncList,$ExcList,$Cln) {
         "$false" {}
         $false {}
         default {
-            [array]$ReturnValue = $false
-            [array]$ReturnValue += '    CleanUp must be True or False'
+            $ReturnValue = [System.Collections.ArrayList]@()
+            [void]$ReturnValue.Add($false)
+            [void]$ReturnValue.Add('    CleanUp must be True or False')
             return $ReturnValue
         } # default
     } # Switch ($Cln)
@@ -222,85 +238,89 @@ Function StringToBool ($Str) {
 } # Function StringToBool
 
 Function Check-Dependencies {
-    param([array]$DepList)
+    param([System.Collections.ArrayList]$DepList)
 
     foreach ($Dep in $DepList) {
         if (-not (Test-Path $Dep)) {
-            [array]$ReturnValue = $false
-            [array]$ReturnValue += "    Missing dependendy: $Dep"
+            $ReturnValue = [System.Collections.ArrayList]@()
+            [void]$ReturnValue.Add($false)
+            [void]$ReturnValue.Add("    Missing dependendy: $Dep")
             return $ReturnValue
         } # foreach ($Dep in $DepList)
     } # foreach ($Dep in $DepList)
 } # Function Check-Dependencies
 
 Function InvalidExit {
-    <# Info #> ""
-    <# Info #> "SYNTAX"
-    <# Info #> "    $PSScriptRoot\DDConvertPacks.ps1 [[-Source] <String>] [[-Destination] <String>] [[-Include] <String>] [[-Exclude] <String>] [[-CleanUp] <String>]"
-    <# Info #> ""
-    <# Info #> "REMARKS"
-    <# Info #> "    To see the examples, type: ""get-help $PSScriptRoot\DDConvertPacks.ps1 -examples""."
-    <# Info #> "    For more information, type: ""get-help $PSScriptRoot\DDConvertPacks.ps1 -detailed""."
-    <# Info #> "    For technical information, type: ""get-help $PSScriptRoot\DDConvertPacks.ps1 -full""."
-    <# Info #> ""
-    <# Info #> "REQUIRED DEPENDENCIES"
-    <# Info #> "    $PSScriptRoot\DDConvertAssets.ps1"
-    <# Info #> "    $PSScriptRoot\dungeondraft-unpack.exe"
-    <# Info #> "    $PSScriptRoot\dungeondraft-pack.exe"
-    <# Info #> ""
+    Write-Output ""
+    Write-Output "SYNTAX"
+    Write-Output "    $PSScriptRoot\DDConvertPacks.ps1 [[-Source] <String>] [[-Destination] <String>] [[-Include] <String>] [[-Exclude] <String>] [[-CleanUp] <String>]"
+    Write-Output ""
+    Write-Output "REMARKS"
+    Write-Output "    To see the examples, type: ""get-help $PSScriptRoot\DDConvertPacks.ps1 -examples""."
+    Write-Output "    For more information, type: ""get-help $PSScriptRoot\DDConvertPacks.ps1 -detailed""."
+    Write-Output "    For technical information, type: ""get-help $PSScriptRoot\DDConvertPacks.ps1 -full""."
+    Write-Output ""
+    Write-Output "REQUIRED DEPENDENCIES"
+    Write-Output "    $PSScriptRoot\DDConvertAssets.ps1"
+    Write-Output "    $PSScriptRoot\dungeondraft-unpack.exe"
+    Write-Output "    $PSScriptRoot\dungeondraft-pack.exe"
+    Write-Output ""
     Exit
 } # Function InvalidExit
 
 # Main {
     $StartNow = Get-Date
-    $ScriptName = "DDConvertPacks"
-    $Version = 3
+    $ScriptName = "DDConvertPacks.ps1"
+    $Version = 4
 
-    <# Info #> ""
-    <# Info #> "### Starting $ScriptName V.$Version at $StartNow"
-    <# Info #> ""
-    
-    $SourcePath = [System.IO.DirectoryInfo]$Source
-    if ($SourcePath.Extension -eq ".dungeondraft_pack") {
-        $Source = $SourcePath.Parent.FullName
-        $Include = $SourcePath.Name
+    Write-Output ""
+    Write-Output "### Starting $ScriptName V.$Version at $StartNow"
+    Write-Output ""
+
+    if ($Source.EndsWith(".dungeondraft_pack")) {
+        $PackFileName = $Source.Substring($Source.LastIndexOf("\")+1)
+        $SourcePath = $Source.Replace("\$PackFileName","")
+        $Source = $SourcePath
+        $Include = $PackFileName
     } # if ($SourcePath.Extension -eq ".dungeondraft_pack")
 
     if ($Destination -eq "") {$Destination = "$Source - webp"}
 
     if ($Include -eq "*") {$IncludeList = ""} else {$IncludeList = $Include.Split(",")}
     $ExcludeList = $Exclude
-    $Validate = @()
+    $Validate = [System.Collections.ArrayList]@()
     $Validate = ValidateInput $Source $Destination $IncludeList $ExcludeList $CleanUp
     if ($Validate.count -ge 1) {
         $Valid = $Validate[0]
         $ExitMessage = $Validate[1]
         If (-not $Valid) {
-            <# Info #> $ExitMessage
-            <# Info #> "### Exiting script due to invalid input."
-            <# Info #> ""
+            Write-Output $ExitMessage
+            Write-Output "### Exiting script due to invalid input."
+            Write-Output ""
             InvalidExit
         } # If (-not $Valid)
     } else {
-        <# Info #> "    Input validated."
+        Write-Output "    Input validated."
     } # if ($Validate.count -ge 1)
 
-    [Array]$Dependencies = ($PSScriptRoot + "\DDConvertAssets.ps1")
-    [Array]$Dependencies += ($PSScriptRoot + "\dungeondraft-unpack.exe")
-    [Array]$Dependencies += ($PSScriptRoot + "\dungeondraft-pack.exe")
-    $Validate = @()
+    $Dependencies = [System.Collections.ArrayList]@()
+    [void]$Dependencies.Add($PSScriptRoot + "\DDConvertAssets.ps1")
+    [void]$Dependencies.Add($PSScriptRoot + "\dungeondraft-unpack.exe")
+    [void]$Dependencies.Add($PSScriptRoot + "\dungeondraft-pack.exe")
+
+    $Validate = [System.Collections.ArrayList]@()
     $Validate = Check-Dependencies $Dependencies
     if ($Validate.count -ge 1) {
         $Valid = $Validate[0]
         $ExitMessage = $Validate[1]
         If (-not $Valid) {
-            <# Info #> $ExitMessage
-            <# Info #> "### Exiting script due to missing dependency."
-            <# Info #> ""
+            Write-Output $ExitMessage
+            Write-Output "### Exiting script due to missing dependency."
+            Write-Output ""
             InvalidExit
         } # If (-not $Valid)
     } else {
-        <# Info #> "    Dependencies validated."
+        Write-Output "    Dependencies validated."
     }# if ($Validate.count -ge 1)
 
     # If an asterisk was used for $AssetFolders, get the full folder list for $AssetParent.
@@ -319,7 +339,8 @@ Function InvalidExit {
             } # if ($Exclude -ne "")
         } else {
             $SplitPacks = $Include.Split(",")
-            foreach ($Pack in $SplitPacks) {[Array]$SelectedPacks += Get-Item $Source\$Pack}
+            $SelectedPacks = [System.Collections.ArrayList]@()
+            foreach ($Pack in $SplitPacks) {[void]$SelectedPacks.add((Get-Item $Source\$Pack))}
             $Manifest = $Include
         } # if ($Include -eq "*")
     } else {
@@ -329,19 +350,19 @@ Function InvalidExit {
     } # if (($SourceItem).PSIsContainer)
 
     if (($Include -eq "*") -or ($Include -eq "")) {$PackSelection = "<all folders>"}
-    <# Info #> ""
-    <# Info #> "    Source: $Source"
-    <# Info #> "    Destination: $Destination"
-    <# Info #> "    Packs to include: $Manifest"
-    <# Info #> "    Packs to exclude: $Exclude"
-    <# Info #> ""
+    Write-Output ""
+    Write-Output "    Source: $Source"
+    Write-Output "    Destination: $Destination"
+    Write-Output "    Packs to include: $Manifest"
+    Write-Output "    Packs to exclude: $Exclude"
+    Write-Output ""
 
     $UnpackDestination = "$Destination\Unpacked Assets"
     $ConvertDestination = "$Destination\Converted Folders" 
     $RepackDestination = "$Destination\Converted Packs"
 
-    <# Info #> "    Processing each pack file..."
-    <# Info #> ""
+    Write-Output "    Processing each pack file..."
+    Write-Output ""
     foreach ($Pack in $SelectedPacks) {
         $PackBaseName = $Pack.BaseName
         $PackName = $Pack.Name
@@ -349,46 +370,46 @@ Function InvalidExit {
 
         # Only process this particular pack if there's no folder for it yet.
         if (Test-Path $PackName) {
-            <# Info #> "        Skipping $PackName" + ": This pack file has already been unpacked."
+            Write-Output "        Skipping $PackName" + ": This pack file has already been unpacked."
         } else {
-            <# Info #> "        Unpacking ""$PackName"" with dungeondraft-unpack.exe..."
+            Write-Output "        Unpacking ""$PackName"" with dungeondraft-unpack.exe..."
             & $PSScriptRoot\dungeondraft-unpack.exe $UnpackSource $UnpackDestination | Out-Null
 
             # If the destination folder does not yet exist, run the conversion.
             if (Test-Path "$ConvertDestination\$PackBasename") {
-                <# Info #> "        Skipping conversion of ""$PackName"": The destination folder already exists."
+                Write-Output "        Skipping conversion of ""$PackName"": The destination folder already exists."
             } else {
-                <# Info #> "        Converting objects in $UnpackDestination\$PackBaseName to .webp with DDConvertAssets.ps1..."
+                Write-Output "        Converting objects in $UnpackDestination\$PackBaseName to .webp with DDConvertAssets.ps1..."
                 & $PSScriptRoot\DDConvertAssets.ps1 "$UnpackDestination\$PackBaseName" "$ConvertDestination\$PackBaseName"
             } # if (Test-Path $GUIDDestination)
 
-            <# Info #> "        Packing $ConvertDestination\$PackBaseName with dungeondraft-pack.exe..."
+            Write-Output "        Packing $ConvertDestination\$PackBaseName with dungeondraft-pack.exe..."
             & $PSScriptRoot\dungeondraft-pack.exe "$ConvertDestination\$PackBaseName" $RepackDestination | Out-Null
 
         } # if (Test-Path $PackName)
-        <# Info #> "        Finished unpacking and converting $PackName."
-        <# Info #> ""
+        Write-Output "        Finished unpacking and converting $PackName."
+        Write-Output ""
     } # foreach ($Pack in $Include)
-    <# Info #> "    Finished processing pack files."
-    <# Info #> ""
+    Write-Output "    Finished processing pack files."
+    Write-Output ""
 
     [bool]$CleanUp = StringToBool $CleanUp
     if ($CleanUp) {
         if (Test-Path $UnpackDestination) {
-            <# Info #> "    Removing $UnpackDestination..."
+            Write-Output "    Removing $UnpackDestination..."
             Remove-Item $UnpackDestination -Recurse
         } # if (Test-Path $UnpackDestination)
 
         if (Test-Path $ConvertDestination) {
-            <# Info #> "    Removing $ConvertDestination..."
+            Write-Output "    Removing $ConvertDestination..."
             Remove-Item $ConvertDestination -Recurse
         } # if (Test-Path $ConvertDestination)
-        <# Info #> "    Finished CleanUp"
+        Write-Output "    Finished CleanUp"
     } # if ($CleanUp)
 
+    Write-Output "    Finished converting packs."
     $EndNow = Get-Date
     $RunTime = $EndNow - $StartNow
-    <# Info #> ""
-    <# Info #> "### Ending $ScriptName V.$Version at $EndNow with a run time of " + ("{0:hh\:mm\:ss}" -f $RunTime)
-    <# Info #> ""
+    Write-Output ("### Ending $ScriptName V.$Version at $EndNow with a run time of " + ("{0:hh\:mm\:ss}" -f $RunTime))
+    Write-Output ""
 # } Main
